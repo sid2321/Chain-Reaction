@@ -1,0 +1,227 @@
+<html>
+
+<head>
+    <style>
+        body {
+            margin: 0px;
+            background-color: #000000;
+        }
+
+        .box {
+            clear: both;
+            min-width: 550px;
+            margin: 0px auto;
+            width: 40%;
+        }
+
+        .row {
+            clear: both
+        }
+
+        .col {
+            transform: rotate(90deg);
+            display: inline;
+            float: left;
+            width: 50px;
+            height: 50px;
+            border: 0.5px solid green;
+            transition: all 0.9s;
+            background-color: #1a1a1a;
+        }
+
+        .col:empty {
+            transform: rotate(-90deg);
+            background-color: #000000;
+        }
+
+        .canvas {
+            padding: 250px 30px;
+            margin: 0px auto;
+        }
+
+        img {
+            width: 50px;
+            height: 50px;
+            display: inline-block;
+        }
+
+        .redborder {
+            border: 0.5px solid red;
+        }
+    </style>
+</head>
+
+<body onload="startgame()">
+    <div class="box">
+        <div id="canvas" onclick="imgclick(event);" class="canvas">
+        </div>
+    </div>
+    <script>
+        var currentcolor;
+
+        function startgame() {
+            currentcolor = "green";
+            var canvas = document.getElementById("canvas");
+            for (var i = 0; i < 10; i++) {
+                for (var j = 0; j < 8; j++) {
+                    var cell;
+                    if (j == 0) {
+                        var ele = document.createElement("DIV");
+                        ele.setAttribute("class", "row col");
+                        ele.crit_Mass = 0;
+
+                        ele.setAttribute("color", " ");
+                        ele.Cell_mass = 0;
+                        cell = ele;
+                    } else {
+                        var ele = document.createElement("DIV");
+                        ele.setAttribute("class", "col");
+                        ele.crit_Mass = 0;
+                        ele.setAttribute("color", " ");
+                        ele.Cell_mass = 0;
+                        cell = ele;
+                    }
+                    if (i != 0) {
+                        cell.crit_Mass++;
+                    }
+                    if (j != 0) {
+                        cell.crit_Mass++;
+                    }
+                    if (i != 9) {
+                        cell.crit_Mass++;
+                    }
+                    if (j != 7) {
+                        cell.crit_Mass++;
+                    }
+
+                    cell.i = i;
+                    cell.j = j;
+                    cell.id = i + "_" + j;
+                    canvas.appendChild(cell);
+                }
+
+            }
+        }
+
+        function imgclick(e) {
+            if (e.target.id == "canvas")
+                return;
+            if (e.target.tagName == "IMG") {
+                addnewimage(e.target.parentNode, false);
+            } else {
+                addnewimage(e.target, false);
+            }
+        }
+
+        function insertimg(target, split) {
+            if (target.Cell_mass != target.crit_Mass) {
+
+                if (target.Cell_mass == 0) {
+                    var img = document.createElement("IMG");
+                    img.setAttribute("src", "img/" + currentcolor + "1.gif");
+                    target.appendChild(img);
+                } else {
+                    target.firstChild.setAttribute("src", "img/" + currentcolor + "" + (target.Cell_mass + 1) + ".gif");
+                }
+            } else {
+                imagespliting(target, split);
+                return;
+            }
+            target.Cell_mass++;
+
+            target.setAttribute("color", currentcolor);
+            if (split == false) {
+                changecolor();
+            }
+        }
+
+        function getPlayerTurnInverse() {
+            if (currentcolor == "green") {
+                return "red";
+            } else {
+                return "green";
+            }
+        }
+
+
+        function imagespliting(target, split) {
+            var temp = target;
+            var id = target.getAttribute("id").toString().split("_");
+            var surroundingcell = [null, null, null, null];
+            var i = parseInt(id[0]);
+            var j = parseInt(id[1]);
+            if ((i - 1) >= 0) {
+                surroundingcell[0] = document.getElementById((i - 1) + "_" + j);
+            }
+
+            if ((j + 1) < 8) {
+                surroundingcell[1] = document.getElementById(i + "_" + (j + 1));
+            }
+
+            if ((i + 1) < 10) {
+                surroundingcell[2] = document.getElementById((i + 1) + "_" + j);
+            }
+
+            if ((j - 1) >= 0) {
+                surroundingcell[3] = document.getElementById(i + "_" + (j - 1));
+            }
+
+            target.innerHTML = "";
+
+            clearimages(target);
+
+            for (var p in surroundingcell) {
+                if (surroundingcell[p] != null)
+                    addnewimage(surroundingcell[p], true);
+            }
+            if (split == true) {
+                for (var q in surroundingcell) {
+                    if (surroundingcell[q] != null) {
+                        surroundingcell[q].setAttribute("color", currentcolor);
+                        surroundingcell[q].firstChild.setAttribute("src", "img/" + currentcolor + "" + (surroundingcell[
+                            q].Cell_mass) + ".gif");
+                    }
+                }
+            } else {
+                changecolor();
+            }
+
+
+        }
+
+        function clearimages(target) {
+            target.setAttribute("color", " ");
+            target.Cell_mass = 0;
+            target.innerHTML = "";
+        }
+
+        function changecolor() {
+            if (currentcolor == "green") {
+                currentcolor = "red";
+            } else {
+                currentcolor = "green";
+            }
+            var cells = document.getElementsByClassName('col');
+            for (var c in cells) {
+                if (c < cells.length)
+                    cells[c].classList.toggle('redborder');
+            }
+        }
+
+        function addnewimage(target, split) {
+            if (target.Cell_mass < target.crit_Mass - 1) {
+                if (split == false) {
+                    if ((target.getAttribute("color") == currentcolor || target.getAttribute("color") == " ")) {
+                        insertimg(target, split);
+                    }
+                } else {
+                    insertimg(target, split);
+                }
+            } else {
+                imagespliting(target, split);
+            }
+        }
+    </script>
+</body>
+
+</html>
